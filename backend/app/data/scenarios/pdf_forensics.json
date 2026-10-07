@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "key": "pdf_forensics",
+    "label": "Perfect forgery (metadata mismatch)",
+    "description": "Every field passes, but the PDF's own metadata shows it was made in Canva today, not issued by a portal in 2021."
+  },
+  "submission": {
+    "company_name": "Sterling Facilities Management",
+    "claimed_years_in_business": 6,
+    "claimed_industry": "Combined office administrative service activities",
+    "claimed_issue_year": 2021,
+    "gstin": "06STFMG4321K1Z8",
+    "cin": "U82110HR2016PTC345678",
+    "pan": "STFMG4321K",
+    "contact_email": "info@sterlingfacilities.in",
+    "contact_phone": "9000033333",
+    "bank_account": "60034567890123",
+    "registered_address": "5 Industrial Area, Faridabad, Haryana"
+  }
+}

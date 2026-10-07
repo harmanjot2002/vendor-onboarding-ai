@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "key": "ghost_vendor",
+    "label": "Ghost vendor (employee self-billing)",
+    "description": "Bank account, phone, and address all match an existing employee in the HR file. Routed to Internal Audit."
+  },
+  "submission": {
+    "company_name": "Apex Facility Services",
+    "claimed_years_in_business": 4,
+    "claimed_industry": "Combined office administrative service activities",
+    "claimed_issue_year": 2024,
+    "gstin": "36APXFS9988H1Z1",
+    "cin": "U82110TG2022PTC456789",
+    "pan": "APXFS9988H",
+    "contact_email": "billing@apexfacility.co.in",
+    "contact_phone": "9877001234",
+    "bank_account": "50101901234567",
+    "registered_address": "Apex Facility Services c/o 12 Jubilee Hills, Hyderabad, Telangana"
+  }
+}

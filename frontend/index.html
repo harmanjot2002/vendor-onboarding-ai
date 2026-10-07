@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vendor Onboarding Automation</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Vendor Onboarding Automation</h1>
+      <div class="sub">Submission &rarr; automated checks &rarr; Approved / Pending / Rejected</div>
+    </div>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" data-view="submit">Submit</button>
+    <button class="tab-btn" data-view="run">Live Run</button>
+    <button class="tab-btn" data-view="dashboard">Dashboard</button>
+  </nav>
+
+  <main>
+    <section id="view-submit" class="view active">
+      <h2 style="font-size:14px;color:#9aa5c0;font-weight:500;margin-bottom:12px;">
+        One-click demo scenarios
+      </h2>
+      <div class="scenario-grid" id="scenario-grid"></div>
+
+      <div class="card">
+        <h2 style="font-size:14px;color:#9aa5c0;font-weight:500;margin:0 0 12px;">
+          Or submit a custom vendor
+        </h2>
+        <form id="submit-form">
+          <div class="form-grid">
+            <div>
+              <label>Company name</label>
+              <input name="company_name" required />
+              <label>Claimed years in business</label>
+              <input name="claimed_years_in_business" type="number" required />
+              <label>Claimed industry</label>
+              <input name="claimed_industry" required />
+              <label>Claimed certificate issue year</label>
+              <input name="claimed_issue_year" type="number" />
+              <label>GSTIN</label>
+              <input name="gstin" required />
+              <label>PAN (optional)</label>
+              <input name="pan" />
+            </div>
+            <div>
+              <label>CIN (optional)</label>
+              <input name="cin" />
+              <label>Contact email</label>
+              <input name="contact_email" type="email" required />
+              <label>Contact phone</label>
+              <input name="contact_phone" required />
+              <label>Bank account</label>
+              <input name="bank_account" required />
+              <label>Registered address</label>
+              <input name="registered_address" required />
+              <label>Certificate PDF (optional)</label>
+              <input name="document" type="file" accept="application/pdf" />
+            </div>
+          </div>
+          <button class="primary" type="submit">Run onboarding check</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="view-run" class="view">
+      <div id="run-content"><div class="empty-state">Run a scenario from the Submit tab to see it here.</div></div>
+    </section>
+
+    <section id="view-dashboard" class="view">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table id="runs-table">
+          <thead>
+            <tr><th>ID</th><th>Vendor</th><th>Scenario</th><th>Status</th><th>Routing</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

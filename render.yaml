@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: vendor-onboarding-ai
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --app-dir backend
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+    autoDeploy: true

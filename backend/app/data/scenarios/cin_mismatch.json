@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "key": "cin_mismatch",
+    "label": "CIN decode mismatch",
+    "description": "Vendor claims 15 years in IT; its CIN decodes to a hotel business incorporated this year."
+  },
+  "submission": {
+    "company_name": "Horizon Tech Solutions",
+    "claimed_years_in_business": 15,
+    "claimed_industry": "Enterprise IT services and software consulting",
+    "claimed_issue_year": 2024,
+    "gstin": "27HRZNT6655Q1Z7",
+    "cin": "U55101MH2025PTC678901",
+    "pan": "HRZNT6655Q",
+    "contact_email": "contact@horizontech.in",
+    "contact_phone": "9000055555",
+    "bank_account": "60056789012345",
+    "registered_address": "21 MIDC Area, Nagpur, Maharashtra"
+  }
+}
