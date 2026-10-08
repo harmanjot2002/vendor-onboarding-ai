@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "key": "proprietorship_mismatch",
+    "label": "Proprietorship bank-name mismatch",
+    "description": "Bank account is in the proprietor's personal name, not the firm's. PAN type confirms this is normal \u2014 Pending, not Rejected."
+  },
+  "submission": {
+    "company_name": "Sharma Traders",
+    "claimed_years_in_business": 3,
+    "claimed_industry": "Non-specialized wholesale trade",
+    "claimed_issue_year": 2024,
+    "gstin": "08RAHPS1234K1Z2",
+    "cin": null,
+    "pan": "RAHPS1234K",
+    "contact_email": "sharmatraders.jaipur@gmail.com",
+    "contact_phone": "9000066666",
+    "bank_account": "60067890123456",
+    "bank_account_holder_name": "Rahul Sharma",
+    "registered_address": "14 Chandpole Bazaar, Jaipur, Rajasthan"
+  }
+}

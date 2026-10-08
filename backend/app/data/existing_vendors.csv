@@ -1,11 +1,12 @@
-vendor_id,name,domain
-V001,Tata Consultancy Services,tcs.com
-V002,Infosys Limited,infosys.com
-V003,Wipro Limited,wipro.com
-V004,HCL Technologies,hcltech.com
-V005,Larsen & Toubro Infotech,lntinfotech.com
-V006,Tech Mahindra,techmahindra.com
-V007,Mindtree Limited,mindtree.com
-V008,Cognizant India,cognizant.com
-V009,Capgemini India,capgemini.com
-V010,Accenture India,accenture.com
+vendor_id,name,domain,bank_account_on_file,known_phone
+V001,Tata Consultancy Services,tcs.com,,
+V002,Infosys Limited,infosys.com,,
+V003,Wipro Limited,wipro.com,,
+V004,HCL Technologies,hcltech.com,,
+V005,Larsen & Toubro Infotech,lntinfotech.com,,
+V006,Tech Mahindra,techmahindra.com,,
+V007,Mindtree Limited,mindtree.com,,
+V008,Cognizant India,cognizant.com,,
+V009,Capgemini India,capgemini.com,,
+V010,Accenture India,accenture.com,,
+V011,NimbusWorks Pvt Ltd,nimbusworks.com,70011122233344,9811223344

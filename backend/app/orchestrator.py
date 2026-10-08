@@ -1,9 +1,14 @@
 import time
 
+from sqlalchemy import func
+
 from .database import Run, RunStage
 from .services.pdf_extract import extract_text_and_metadata
 from .services.llm_extract import extract_fields_from_document
-from .rules import field_validation, prompt_injection, pdf_forensics, ghost_vendor, homoglyph, cin_decoder
+from .rules import (
+    field_validation, prompt_injection, pdf_forensics, ghost_vendor, homoglyph,
+    cin_decoder, tax_identity, proprietorship, bank_change_attack, completeness,
+)
 
 STAGE_DELAY_SECONDS = 0.5  # purely cosmetic — lets the live run view visibly step through stages
 
@@ -16,12 +21,35 @@ def _add_stage(db, run: Run, order_index: int, name: str, status: str, detail: s
     return stage
 
 
-def run_pipeline(db, run_id: int, submission: dict, pdf_bytes: bytes | None):
-    run = db.get(Run, run_id)
-    idx = 0
-    flags = {}  # stage_key -> detail string, only set when status != "passed"
+def _next_index(db, run_id: int) -> int:
+    current_max = db.query(func.max(RunStage.order_index)).filter(RunStage.run_id == run_id).scalar()
+    return (current_max or 0)
 
-    # Stage 1: Intake & schema validation
+
+def run_pipeline(db, run_id: int, submission: dict, pdf_bytes: bytes | None):
+    """Runs (or continues) a run's pipeline. Safe to call twice on the same run_id: a prior
+    call that stopped at the completeness check (because no document was attached) can be
+    re-invoked later with a freshly-uploaded document, and stage numbering + the audit trail
+    continue from where they left off rather than restarting."""
+    run = db.get(Run, run_id)
+    idx = _next_index(db, run_id)
+    flags = {}
+
+    # Stage: document completeness (always first — also the re-entry point on resubmission)
+    idx += 1
+    completeness_status, completeness_detail = completeness.check_completeness(
+        has_document=bool(pdf_bytes), company_name=submission.get("company_name", "this vendor")
+    )
+    _add_stage(db, run, idx, "Document completeness check", completeness_status, completeness_detail)
+    if completeness_status == "incomplete":
+        run.status = "pending_documents"
+        run.routing = "awaiting_vendor"
+        run.reason_summary = "Awaiting vendor resubmission — required document not yet attached. Drafted request email (see stage detail above)."
+        db.add(run)
+        db.commit()
+        return
+
+    # Stage: Intake & schema validation
     idx += 1
     status, detail = field_validation.check_required_fields(submission)
     if status == "passed":
@@ -37,7 +65,7 @@ def run_pipeline(db, run_id: int, submission: dict, pdf_bytes: bytes | None):
     if status == "failed":
         flags["hard_fail"] = detail
 
-    # Stage 2: Document ingestion
+    # Stage: Document ingestion
     idx += 1
     doc_text, doc_metadata = "", {}
     if pdf_bytes:
@@ -51,14 +79,14 @@ def run_pipeline(db, run_id: int, submission: dict, pdf_bytes: bytes | None):
     else:
         _add_stage(db, run, idx, "Document ingestion", "skipped", "No document uploaded for this submission.")
 
-    # Stage 2a: Prompt-injection scan (independent of the LLM)
+    # Stage: Prompt-injection scan (independent of the LLM)
     idx += 1
     inj_status, inj_detail = prompt_injection.scan_for_injection(doc_text)
     _add_stage(db, run, idx, "Prompt-injection scan (raw text)", inj_status, inj_detail)
     if inj_status == "flagged":
         flags["prompt_injection"] = inj_detail
 
-    # Stage 2b: PDF forensics
+    # Stage: PDF forensics
     idx += 1
     if doc_metadata:
         claimed_year = submission.get("claimed_issue_year")
@@ -69,7 +97,7 @@ def run_pipeline(db, run_id: int, submission: dict, pdf_bytes: bytes | None):
     else:
         _add_stage(db, run, idx, "PDF metadata forensics", "skipped", "No PDF metadata available.")
 
-    # Stage 3: LLM-assisted extraction (reads, never decides)
+    # Stage: LLM-assisted extraction (reads, never decides)
     idx += 1
     if doc_text:
         llm_result = extract_fields_from_document(doc_text)
@@ -88,28 +116,54 @@ def run_pipeline(db, run_id: int, submission: dict, pdf_bytes: bytes | None):
     else:
         _add_stage(db, run, idx, "LLM-assisted extraction (reads, does not decide)", "skipped", "No document text to extract from.")
 
-    # Stage 4: Identity consistency (CIN decode)
+    # Stage: Identity consistency — CIN decode
     idx += 1
     cin_status, cin_detail = cin_decoder.check_cin(submission)
     _add_stage(db, run, idx, "Identity consistency — CIN decode", cin_status, cin_detail)
     if cin_status == "flagged":
         flags["cin_mismatch"] = cin_detail
 
-    # Stage 5a: Ghost vendor cross-check
+    # Stage: Identity consistency — GSTIN/PAN/state internal consistency
+    idx += 1
+    tax_category, tax_status, tax_detail = tax_identity.check_tax_identity(submission)
+    _add_stage(db, run, idx, "Identity consistency — GSTIN internal checks", tax_status, tax_detail)
+    if tax_category == "mismatch":
+        flags["tax_identity_mismatch"] = tax_detail
+    elif tax_category == "typo":
+        flags["gstin_typo"] = tax_detail
+
+    # Stage: Identity consistency — bank account holder name vs. company (proprietorship nuance)
+    idx += 1
+    bank_name_status, bank_name_detail = proprietorship.check_bank_holder_name(submission)
+    display_status = "flagged" if bank_name_status in ("flagged_soft", "flagged_hard") else bank_name_status
+    _add_stage(db, run, idx, "Identity consistency — bank account holder name", display_status, bank_name_detail)
+    if bank_name_status == "flagged_soft":
+        flags["proprietorship_mismatch"] = bank_name_detail
+    elif bank_name_status == "flagged_hard":
+        flags["bank_name_mismatch"] = bank_name_detail
+
+    # Stage: Fraud check — bank-detail change / business email compromise
+    idx += 1
+    bec_status, bec_detail = bank_change_attack.check_bank_change_attack(submission)
+    _add_stage(db, run, idx, "Fraud check — bank detail change pattern", bec_status, bec_detail)
+    if bec_status == "flagged":
+        flags["bank_change_attack"] = bec_detail
+
+    # Stage: Fraud check — ghost vendor (employee cross-reference)
     idx += 1
     gv_status, gv_detail = ghost_vendor.check_ghost_vendor(submission)
     _add_stage(db, run, idx, "Fraud check — employee cross-reference", gv_status, gv_detail)
     if gv_status == "flagged":
         flags["ghost_vendor"] = gv_detail
 
-    # Stage 5b: Homoglyph impersonation check
+    # Stage: Fraud check — homoglyph impersonation
     idx += 1
     hg_status, hg_detail = homoglyph.check_homoglyph(submission)
     _add_stage(db, run, idx, "Fraud check — look-alike vendor name/domain", hg_status, hg_detail)
     if hg_status == "flagged":
         flags["homoglyph"] = hg_detail
 
-    # Stage 6: Risk scoring & decision (deterministic, priority-ordered)
+    # Stage: Risk scoring & decision (deterministic, priority-ordered)
     idx += 1
     status_final, reason, routing = _decide(flags)
     _add_stage(db, run, idx, "Risk scoring & decision", "passed", reason)
@@ -134,12 +188,22 @@ def _decide(flags: dict):
         )
     if "homoglyph" in flags:
         return "rejected", f"Rejected — impersonation of an existing approved vendor. {flags['homoglyph']}", "procurement"
+    if "bank_change_attack" in flags:
+        return (
+            "pending",
+            f"Pending — on hold for out-of-band verification (business email compromise pattern). {flags['bank_change_attack']}",
+            "finance_verification",
+        )
     if "ghost_vendor" in flags:
         return (
             "pending",
             f"Pending — escalated to Internal Audit, not the standard procurement approver. {flags['ghost_vendor']}",
             "internal_audit",
         )
+    if "tax_identity_mismatch" in flags:
+        return "pending", f"Pending — tax identity documents need clarification. {flags['tax_identity_mismatch']}", "procurement"
+    if "bank_name_mismatch" in flags:
+        return "pending", f"Pending — bank account ownership needs manual verification. {flags['bank_name_mismatch']}", "procurement"
     if "pdf_forensics" in flags:
         return (
             "pending",
@@ -149,4 +213,8 @@ def _decide(flags: dict):
         )
     if "cin_mismatch" in flags:
         return "pending", f"Pending — enhanced due diligence required. {flags['cin_mismatch']}", "procurement"
+    if "gstin_typo" in flags:
+        return "pending", f"Pending — likely a data-entry typo, not fraud. {flags['gstin_typo']}", "procurement"
+    if "proprietorship_mismatch" in flags:
+        return "pending", f"Pending — requesting a proprietorship declaration. {flags['proprietorship_mismatch']}", "procurement"
     return "approved", "Approved — all checks passed.", "procurement"

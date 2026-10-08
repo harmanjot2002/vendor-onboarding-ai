@@ -180,6 +180,37 @@ the document itself) → prompt injection (ties to AI architecture, best closer)
 
 ---
 
+## 7b. Additional edge cases (round 2 — judgment over pattern-matching)
+
+Five more scenarios, added after the first build, deliberately chosen to show nuance rather
+than just "catch the bad guy":
+
+| # | Scenario | What it shows | Outcome |
+|---|----------|----------------|---------|
+| 6 | Proprietorship bank-name mismatch (`Sharma Traders` / bank held by `Rahul Sharma`) | Distinguishing a normal pattern from a red flag — PAN's 4th character (`P` = individual) explains the mismatch | **Pending** — request a proprietorship declaration, not reject |
+| 7 | GSTIN state code vs. registered address (claims Maharashtra, address is Karnataka) | Internal tax-identity consistency, independent of document fraud | **Pending** — clarification needed |
+| 8 | GSTIN checksum failure, everything else consistent | Distinguishing a typo from fraud — same rule module as #7, opposite branch | **Pending** — "likely a typo, please recheck," deliberately gentler tone |
+| 9 | Bank account changed + new email domain, on an exact vendor-name match to an already-approved vendor | Business email compromise (BEC) detection on an *update*, not just new onboarding | **Pending**, held for **out-of-band phone verification** using the number on file — never the one in the submission |
+| 10 | No document attached at submission | Stateful audit trail: the pipeline stops at a completeness check, drafts a vendor-facing email, and — on resubmission — the *same run* continues from that exact point through to a final decision | **Pending (awaiting documents)** → resubmit → **Approved** |
+
+Implementation notes:
+- The completeness check is now the pipeline's first stage for every submission (old and new
+  scenarios alike) — it just always passes when a document is attached, so it's a no-op for
+  the original 6 scenarios.
+- Stage numbering is continuation-safe: `orchestrator.run_pipeline` computes its starting
+  `order_index` from the run's existing stages rather than resetting to 0, so calling it twice
+  on the same `run_id` (once with no document, once after `/api/runs/{id}/resubmit`) produces
+  one continuous, append-only audit trail instead of a second disconnected run.
+- The typo-vs-mismatch distinction (edge case 7/8) lives in one rule module
+  (`rules/tax_identity.py`) with two branches: an embedded-PAN or state-code mismatch is
+  reported as a real inconsistency; a checksum failure with everything else consistent is
+  reported as a probable typo. Same mechanism, different judgment call — made explicit in the
+  returned message, not just the status.
+- The BEC check (`rules/bank_change_attack.py`) only fires when an **exact** company-name
+  match to an existing approved vendor also changes both the bank account *and* the email
+  domain in the same submission — changing just one is treated as lower-risk and passes with
+  an informational note, which is the real-world shape of this attack.
+
 ## 8. Explicit assumptions (note these for the live pitch, per the case study FAQ)
 
 - Country context: India (GSTIN/PAN/CIN/Udyam formats), since four of the five edge cases are

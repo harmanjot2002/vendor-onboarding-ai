@@ -48,10 +48,24 @@ document.getElementById("submit-form").addEventListener("submit", async (e) => {
 });
 
 const STAGE_ICON = { passed: "passed", flagged: "flagged", failed: "failed", skipped: "skipped" };
+const ROUTING_LABELS = {
+  internal_audit: "routed to Internal Audit",
+  finance_verification: "on hold — out-of-band verification required",
+  awaiting_vendor: "waiting on vendor resubmission",
+};
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
 
 function renderRun(run) {
   const container = document.getElementById("run-content");
-  const statusKnown = run.status !== "running";
+  const isRunning = run.status === "running";
+  const awaitingDocs = run.status === "pending_documents";
+  const statusKnown = !isRunning;
+  const statusLabel = run.status.replace("_", " ");
 
   let html = `<div class="card decision-card">
     <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -61,13 +75,26 @@ function renderRun(run) {
           ${run.scenario_key ? "Scenario: " + run.scenario_key : "Custom submission"}
         </div>
       </div>
-      <span class="status-pill ${run.status}">${run.status}</span>
+      <span class="status-pill ${run.status}">${statusLabel}</span>
     </div>`;
 
   if (statusKnown) {
-    html += `<p style="margin:14px 0 0;font-size:13px;line-height:1.6;">${run.reason_summary}
-      ${run.routing === "internal_audit" ? '<span class="routing-tag">&rarr; routed to Internal Audit</span>' : ""}
+    const routingLabel = ROUTING_LABELS[run.routing];
+    html += `<p style="margin:14px 0 0;font-size:13px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(run.reason_summary)}
+      ${routingLabel ? `<span class="routing-tag">&rarr; ${routingLabel}</span>` : ""}
     </p>`;
+  }
+
+  if (awaitingDocs) {
+    html += `
+      <form id="resubmit-form" style="margin-top:16px;border-top:1px solid var(--panel-border);padding-top:16px;">
+        <label style="display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;">
+          Vendor resubmits the missing document
+        </label>
+        <input type="file" name="document" accept="application/pdf" required
+          style="font-size:13px;color:var(--text);" />
+        <button class="primary" type="submit" style="margin-left:12px;">Resubmit & continue this run</button>
+      </form>`;
   }
   html += `</div>`;
 
@@ -77,7 +104,7 @@ function renderRun(run) {
       <div class="stage-dot ${stage.status}"></div>
       <div>
         <div class="stage-name">${stage.stage_name}</div>
-        <div class="stage-detail">${stage.detail || ""}</div>
+        <div class="stage-detail" style="white-space:pre-wrap;">${escapeHtml(stage.detail || "")}</div>
       </div>
     </li>`;
   });
@@ -88,6 +115,16 @@ function renderRun(run) {
   html += `</ul></div>`;
 
   container.innerHTML = html;
+
+  const resubmitForm = document.getElementById("resubmit-form");
+  if (resubmitForm) {
+    resubmitForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = new FormData(e.target);
+      await fetch(`/api/runs/${run.id}/resubmit`, { method: "POST", body: form });
+      watchRun(run.id);
+    });
+  }
 }
 
 async function watchRun(runId) {

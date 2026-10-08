@@ -9,12 +9,13 @@
     "claimed_years_in_business": 8,
     "claimed_industry": "Freight transport support and logistics services",
     "claimed_issue_year": 2022,
-    "gstin": "27AAAPL1234C1Z5",
+    "gstin": "27AAAPL1234C1ZE",
     "cin": "U52290MH2015PTC123456",
     "pan": "AAAPL1234C",
     "contact_email": "accounts@greenleaflogistics.in",
     "contact_phone": "9000011111",
     "bank_account": "60012345678901",
+    "bank_account_holder_name": "GreenLeaf Logistics Pvt Ltd",
     "registered_address": "14 Industrial Estate, Navi Mumbai, Maharashtra"
   }
 }

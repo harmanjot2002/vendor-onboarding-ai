@@ -9,12 +9,13 @@
     "claimed_years_in_business": 15,
     "claimed_industry": "Enterprise IT services and software consulting",
     "claimed_issue_year": 2024,
-    "gstin": "27HRZNT6655Q1Z7",
+    "gstin": "27HRZNT6655Q1Z3",
     "cin": "U55101MH2025PTC678901",
     "pan": "HRZNT6655Q",
     "contact_email": "contact@horizontech.in",
     "contact_phone": "9000055555",
     "bank_account": "60056789012345",
+    "bank_account_holder_name": "Horizon Tech Solutions",
     "registered_address": "21 MIDC Area, Nagpur, Maharashtra"
   }
 }

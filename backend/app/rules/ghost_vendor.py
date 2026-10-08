@@ -28,7 +28,7 @@ def check_ghost_vendor(submission: dict):
             reasons.append(f"bank account matches employee {emp['name']} ({emp['employee_id']})")
         if phone and phone == _normalize_phone(emp["phone"]):
             reasons.append(f"phone number matches employee {emp['name']} ({emp['employee_id']})")
-        if address and fuzz.partial_ratio(address.lower(), emp["address"].lower()) >= ADDRESS_THRESHOLD:
+        if address and fuzz.token_set_ratio(address.lower(), emp["address"].lower()) >= ADDRESS_THRESHOLD:
             reasons.append(f"registered address closely matches employee {emp['name']}'s address on file")
 
         if reasons:

@@ -9,12 +9,13 @@
     "claimed_years_in_business": 5,
     "claimed_industry": "Management consultancy activities",
     "claimed_issue_year": 2023,
-    "gstin": "29BEDCS5678F1Z2",
+    "gstin": "29BEDCS5678F1ZO",
     "cin": "U70200KA2015PTC234567",
     "pan": "BEDCS5678F",
     "contact_email": "accounts@brightedgeconsulting.com",
     "contact_phone": "9000022222",
     "bank_account": "60023456789012",
+    "bank_account_holder_name": "BrightEdge Consulting Services",
     "registered_address": "22 Residency Road, Bengaluru, Karnataka"
   }
 }

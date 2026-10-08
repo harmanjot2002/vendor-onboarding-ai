@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "key": "tax_identity_mismatch",
+    "label": "GSTIN/address state mismatch",
+    "description": "GSTIN's state code says Maharashtra; the registered address is in Karnataka. Internally inconsistent tax identity."
+  },
+  "submission": {
+    "company_name": "Meridian Traders Pvt Ltd",
+    "claimed_years_in_business": 7,
+    "claimed_industry": "Non-specialized wholesale trade",
+    "claimed_issue_year": 2023,
+    "gstin": "27MERTR5566F1ZA",
+    "cin": "U46900KA2017PTC778899",
+    "pan": "MERTR5566F",
+    "contact_email": "accounts@meridiantraders.in",
+    "contact_phone": "9000077777",
+    "bank_account": "60078901234567",
+    "bank_account_holder_name": "Meridian Traders Pvt Ltd",
+    "registered_address": "12 Residency Road, Bengaluru, Karnataka"
+  }
+}

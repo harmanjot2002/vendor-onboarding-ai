@@ -14,6 +14,7 @@ class Submission(BaseModel):
     contact_email: str
     contact_phone: str
     bank_account: str
+    bank_account_holder_name: Optional[str] = None
     registered_address: str
 
 

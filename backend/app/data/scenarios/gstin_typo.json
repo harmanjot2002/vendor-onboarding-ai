@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "key": "gstin_typo",
+    "label": "GSTIN checksum failure (likely typo)",
+    "description": "Every field is consistent except the GSTIN's own check digit \u2014 read as a typo, not fraud."
+  },
+  "submission": {
+    "company_name": "Kiran Enterprises",
+    "claimed_years_in_business": 5,
+    "claimed_industry": "Retail sale via internet",
+    "claimed_issue_year": 2023,
+    "gstin": "24KIREN7788L1ZK",
+    "cin": "U47911GJ2019PTC889900",
+    "pan": "KIREN7788L",
+    "contact_email": "accounts@kiranenterprises.in",
+    "contact_phone": "9000088888",
+    "bank_account": "60089012345678",
+    "bank_account_holder_name": "Kiran Enterprises",
+    "registered_address": "8 CG Road, Ahmedabad, Gujarat"
+  }
+}

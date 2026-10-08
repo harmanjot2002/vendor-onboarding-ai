@@ -89,6 +89,7 @@ async def submit_vendor(
     contact_email: str = Form(...),
     contact_phone: str = Form(...),
     bank_account: str = Form(...),
+    bank_account_holder_name: str | None = Form(None),
     registered_address: str = Form(...),
     document: UploadFile | None = File(None),
 ):
@@ -104,6 +105,7 @@ async def submit_vendor(
         "contact_email": contact_email,
         "contact_phone": contact_phone,
         "bank_account": bank_account,
+        "bank_account_holder_name": bank_account_holder_name,
         "registered_address": registered_address,
     }
     pdf_bytes = await document.read() if document is not None else None
@@ -123,6 +125,27 @@ async def submit_vendor(
     finally:
         db.close()
 
+    background_tasks.add_task(_execute_pipeline, run_id, submission, pdf_bytes)
+    return {"run_id": run_id}
+
+
+@app.post("/api/runs/{run_id}/resubmit")
+async def resubmit_run(run_id: int, background_tasks: BackgroundTasks, document: UploadFile = File(...)):
+    db = get_session()
+    try:
+        run = db.get(Run, run_id)
+        if run is None:
+            raise HTTPException(404, "Run not found")
+        if run.status != "pending_documents":
+            raise HTTPException(400, f"Run #{run_id} is not awaiting documents (status: {run.status}).")
+        submission = json.loads(run.submission_json)
+        run.status = "running"
+        db.add(run)
+        db.commit()
+    finally:
+        db.close()
+
+    pdf_bytes = await document.read()
     background_tasks.add_task(_execute_pipeline, run_id, submission, pdf_bytes)
     return {"run_id": run_id}
 

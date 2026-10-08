@@ -195,6 +195,7 @@ button.primary:hover { opacity: 0.9; }
 .status-pill.pending { background: rgba(242,183,5,0.15); color: var(--amber); }
 .status-pill.rejected { background: rgba(239,75,95,0.15); color: var(--red); }
 .status-pill.running { background: rgba(90,100,130,0.3); color: var(--text-dim); }
+.status-pill.pending_documents { background: rgba(242,183,5,0.10); color: var(--amber); }
 
 .decision-card {
   border-left: 4px solid var(--accent);

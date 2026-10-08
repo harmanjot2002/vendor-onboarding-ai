@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "key": "incomplete_submission",
+    "label": "Incomplete submission -> resubmit -> approved",
+    "description": "No certificate attached yet. Goes to Pending with a drafted request email; upload the document in the Live Run view to watch the same run continue to Approved."
+  },
+  "submission": {
+    "company_name": "Vantage Business Services",
+    "claimed_years_in_business": 4,
+    "claimed_industry": "Management consultancy activities",
+    "claimed_issue_year": 2024,
+    "gstin": "27VANBS3344N1Z8",
+    "cin": "U70200MH2020PTC001122",
+    "pan": "VANBS3344N",
+    "contact_email": "accounts@vantagebiz.in",
+    "contact_phone": "9000012121",
+    "bank_account": "60012121212121",
+    "bank_account_holder_name": "Vantage Business Services",
+    "registered_address": "9 Baner Road, Pune, Maharashtra"
+  }
+}

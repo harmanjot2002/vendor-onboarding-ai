@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "key": "bank_change_attack",
+    "label": "Bank-detail change (BEC pattern)",
+    "description": "An 'existing vendor' changes its bank account and emails from a new domain in the same request \u2014 classic business email compromise."
+  },
+  "submission": {
+    "company_name": "NimbusWorks Pvt Ltd",
+    "claimed_years_in_business": 6,
+    "claimed_industry": "Software publishing and development",
+    "claimed_issue_year": 2024,
+    "gstin": "29NIMWK9900M1ZT",
+    "cin": "U62012KA2018PTC990011",
+    "pan": "NIMWK9900M",
+    "contact_email": "accounts@nimbusworks-finance.com",
+    "contact_phone": "9000099999",
+    "bank_account": "70099988877766",
+    "bank_account_holder_name": "NimbusWorks Pvt Ltd",
+    "registered_address": "12 Electronic City, Bengaluru, Karnataka"
+  }
+}
