@@ -47,25 +47,37 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// The 4 scenarios led with in the video/interview — everything else is still fully
+// built and demoable, just not front-and-center, so the UI itself shows the same
+// focus-over-breadth judgment the case study asks for.
+const CORE_SCENARIO_KEYS = ["happy_path", "prompt_injection", "bank_change_attack", "incomplete_submission"];
+
+function renderScenarioCard(s) {
+  const cat = CATEGORY[s.key] || { color: "#7c6cf6", bg: "rgba(124,108,246,0.14)", label: "Edge case" };
+  const isHappy = s.key === "happy_path";
+  const el = document.createElement("div");
+  el.className = "scenario-card";
+  el.style.setProperty("--cat-color", cat.color);
+  el.style.setProperty("--cat-bg", cat.bg);
+  el.innerHTML = `
+    <span class="badge ${isHappy ? "happy" : "edge"}">${cat.label}</span>
+    <h3>${s.label}</h3>
+    <p>${s.description}</p>
+  `;
+  el.addEventListener("click", () => runScenario(s.key));
+  return el;
+}
+
 async function loadScenarios() {
   const res = await fetch("/api/scenarios");
   const scenarios = await res.json();
-  const grid = document.getElementById("scenario-grid");
-  grid.innerHTML = "";
+  const coreGrid = document.getElementById("scenario-grid-core");
+  const extraGrid = document.getElementById("scenario-grid-extra");
+  coreGrid.innerHTML = "";
+  extraGrid.innerHTML = "";
   scenarios.forEach((s) => {
-    const cat = CATEGORY[s.key] || { color: "#7c6cf6", bg: "rgba(124,108,246,0.14)", label: "Edge case" };
-    const isHappy = s.key === "happy_path";
-    const el = document.createElement("div");
-    el.className = "scenario-card";
-    el.style.setProperty("--cat-color", cat.color);
-    el.style.setProperty("--cat-bg", cat.bg);
-    el.innerHTML = `
-      <span class="badge ${isHappy ? "happy" : "edge"}">${cat.label}</span>
-      <h3>${s.label}</h3>
-      <p>${s.description}</p>
-    `;
-    el.addEventListener("click", () => runScenario(s.key));
-    grid.appendChild(el);
+    const target = CORE_SCENARIO_KEYS.includes(s.key) ? coreGrid : extraGrid;
+    target.appendChild(renderScenarioCard(s));
   });
 }
 
