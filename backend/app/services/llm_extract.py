@@ -1,18 +1,30 @@
 import os
 import json
 
-_client = None
+_anthropic_client = None
+_openai_client = None
 
 
-def _get_client():
-    global _client
-    if _client is None:
+def _get_anthropic_client():
+    global _anthropic_client
+    if _anthropic_client is None:
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
             return None
         import anthropic
-        _client = anthropic.Anthropic(api_key=api_key)
-    return _client
+        _anthropic_client = anthropic.Anthropic(api_key=api_key)
+    return _anthropic_client
+
+
+def _get_openai_client():
+    global _openai_client
+    if _openai_client is None:
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            return None
+        import openai
+        _openai_client = openai.OpenAI(api_key=api_key)
+    return _openai_client
 
 
 SYSTEM_PROMPT = """You are a document-extraction assistant for a vendor-onboarding process.
@@ -35,23 +47,43 @@ Respond with a single JSON object only, matching this shape:
 """
 
 
-def extract_fields_from_document(raw_text: str):
-    client = _get_client()
-    if client is None:
-        return {
-            "extracted_fields": {},
-            "flagged_instructions": [],
-            "summary": "LLM extraction skipped (no ANTHROPIC_API_KEY configured).",
-            "_llm_skipped": True,
-        }
-
+def _call_anthropic(client, raw_text: str) -> str:
     message = client.messages.create(
         model="claude-sonnet-5",
         max_tokens=1024,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": f"Document text:\n\n{raw_text[:8000]}"}],
     )
-    text = "".join(block.text for block in message.content if hasattr(block, "text"))
+    return "".join(block.text for block in message.content if hasattr(block, "text"))
+
+
+def _call_openai(client, raw_text: str) -> str:
+    model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+    response = client.chat.completions.create(
+        model=model,
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"Document text:\n\n{raw_text[:8000]}"},
+        ],
+    )
+    return response.choices[0].message.content
+
+
+def extract_fields_from_document(raw_text: str):
+    anthropic_client = _get_anthropic_client()
+    openai_client = None if anthropic_client else _get_openai_client()
+
+    if anthropic_client is None and openai_client is None:
+        return {
+            "extracted_fields": {},
+            "flagged_instructions": [],
+            "summary": "LLM extraction skipped (no ANTHROPIC_API_KEY or OPENAI_API_KEY configured).",
+            "_llm_skipped": True,
+        }
+
+    text = _call_anthropic(anthropic_client, raw_text) if anthropic_client else _call_openai(openai_client, raw_text)
+
     try:
         start = text.index("{")
         end = text.rindex("}") + 1
