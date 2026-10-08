@@ -4,14 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Vendor Onboarding Automation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <div>
-      <h1>Vendor Onboarding Automation</h1>
-      <div class="sub">Submission &rarr; automated checks &rarr; Approved / Pending / Rejected</div>
+    <div class="brand">
+      <div class="brand-mark">VO</div>
+      <div>
+        <h1>Vendor Onboarding Automation</h1>
+        <div class="sub">Submission &rarr; automated checks &rarr; Approved / Pending / Rejected</div>
+      </div>
     </div>
+    <div class="live-indicator"><span class="live-dot"></span> rules-based decisioning</div>
   </header>
 
   <nav>
@@ -22,15 +29,11 @@
 
   <main>
     <section id="view-submit" class="view active">
-      <h2 style="font-size:14px;color:#9aa5c0;font-weight:500;margin-bottom:12px;">
-        One-click demo scenarios
-      </h2>
+      <div class="section-label">One-click demo scenarios</div>
       <div class="scenario-grid" id="scenario-grid"></div>
 
       <div class="card">
-        <h2 style="font-size:14px;color:#9aa5c0;font-weight:500;margin:0 0 12px;">
-          Or submit a custom vendor
-        </h2>
+        <div class="section-label" style="margin-bottom:16px;">Or submit a custom vendor</div>
         <form id="submit-form">
           <div class="form-grid">
             <div>
@@ -64,7 +67,7 @@
               <input name="document" type="file" accept="application/pdf" />
             </div>
           </div>
-          <button class="primary" type="submit">Run onboarding check</button>
+          <button class="primary" type="submit">Run onboarding check &rarr;</button>
         </form>
       </div>
     </section>
@@ -74,13 +77,16 @@
     </section>
 
     <section id="view-dashboard" class="view">
+      <div class="stat-grid" id="stat-grid"></div>
       <div class="card" style="padding:0;overflow:hidden;">
-        <table id="runs-table">
-          <thead>
-            <tr><th>ID</th><th>Vendor</th><th>Scenario</th><th>Status</th><th>Routing</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div class="table-scroll">
+          <table id="runs-table">
+            <thead>
+              <tr><th>ID</th><th>Vendor</th><th>Scenario</th><th>Status</th><th>Routing</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
